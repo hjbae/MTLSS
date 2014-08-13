@@ -26,13 +26,13 @@
             this->f = f;
             this->c = c;
 
-
+// Define dt
             dt = new double[ntdim-1];
             for (int i =0; i<ntdim-1; i++)
             {
                 dt[i] = t[i+1]-t[i];
             }
-        
+// Define s, the larger timestep, and ds       
             s = new double[nn];
             for (int i = 0; i<nn; i++)
             {
@@ -44,7 +44,7 @@
                 ds[i] = s[i+1] - s[i];
             }
             
-
+// Find the linear interpolation of the coarse grid values
             for (int i = 0; i < nn-1; i++)
             {
                 for ( int k = 0 ; k < c; k ++)
@@ -58,8 +58,7 @@
                 }
             }
 
-
-
+// Calculate mid values of fine grid values
             uMidf = new double[nsdim*(ntdim-1)];
             for (int i = 0; i<ntdim-1; i++)
             {
@@ -69,7 +68,7 @@
                 }
             }
            
- 
+ // Calculate mid values of coarse grid values
             uMidc = new double[nsdim*(nn-1)];
             for (int i = 0; i < nn-1; i++)
             {
@@ -80,7 +79,7 @@
             }
 
 
-
+// Calculate dudt in fine and coarse grid points
             dudtf = new double[(ntdim-1)*f];
             for (int i = 0; i<ntdim-1; i++)
             {
@@ -101,7 +100,7 @@
 
             this->mapcoarse = mapcoarse;
             this->mapfine = mapfine;
-
+//Inverse mat of coarse and fine
             coarse = new int[nsdim];
             for (int i = 0; i<nsdim; i++)
             {
@@ -125,7 +124,7 @@
             this->alpha = alpha;
         };
 
-
+// Apply diagonal preconditioner
         Vec lssSolver::APinvx(Vec x)
         {
             Vec y;
@@ -203,7 +202,7 @@
             VecDestroy(&y);
             return Ax;
         }
-
+// CG solve
         void lssSolver::CGSolve(Vec b, Vec* w)
         {
 
@@ -266,7 +265,7 @@
                 k ++;
             } 
         }
-
+// main solver of MTLSS
         double* lssSolver::lss(int maxIter,double atol,double rtol)
         {
 
