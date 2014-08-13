@@ -1,0 +1,18 @@
+#!/bin/sh
+#PBS -l nodes=1:gpus=1
+
+########### UPDATE THESE VARIABLES ###############
+# the directory where your files are
+fp_home=/home/$USER/Research/petsc-3.4.3/Lecture25/stb
+##################################################
+
+cd $fp_home
+echo $USER
+echo $fp_home
+
+######### ADD YOUR EXECUTION SCRIPT HERE #########
+# Compile the program
+make main_stb
+# Run program 
+./main_stb
+
