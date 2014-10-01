@@ -4,13 +4,13 @@
 #include "petscmat.h"
 #include "petscpcasa.h"
 #include "petscvec.h"
-//#include "burgers2D.hpp"
-#include "eulervortex.hpp"
+#include "burgers2D.hpp"
+//#include "eulervortex.hpp"
 #include "stdlib.h"
 #include <iostream>
 #include "LSSm.hpp"
 #include <stdio.h>
-
+#include <fstream>
         lssSolver::lssSolver(double* t, double* u0, double* zz, int p, int c, int f, int* mapcoarse, int* mapfine, int ntdim, int nsdim, double alpha)
         {
 
@@ -277,7 +277,6 @@
 
             double* funcvalf = F(uMidf, 1, ntdim, nsdim);
             double* funcvalc = F(uMidc, 1, nn, nsdim);
-
             for (int i=0; i< nn-1; i++)
             {
                 for (int j = 0; j < c; j++)
@@ -666,7 +665,7 @@
                     }
                 }
 
-
+                t[0] = 0;
                 for (int i =1; i<ntdim; i++)
                 {
                     t[i] = t[i-1]+dt[i-1];
@@ -685,6 +684,7 @@
                 VecDestroy(&v);
                 VecDestroy(&w);
 
+
                 for (int i = 0; i < nn-1; i++)
                 {
                     for ( int k = 0 ; k < c; k ++)
@@ -692,7 +692,7 @@
                         double sub = 0;
                         for (int j =1; j < p; j ++)
                         {
-                            sub += dt[i*p+j-1];
+                            sub = t[i*p+j]-s[i];
                             u[(i*p+j)*nsdim+mapcoarse[k]] = (1-sub/ds[i])*u[i*p*nsdim+mapcoarse[k]] + (sub/ds[i])*u[(i+1)*p*nsdim+mapcoarse[k]];
                         }
                     }
@@ -766,9 +766,20 @@
 
 
                 std::cout << "Norm of b is " << norm_b << std::endl;
-
                 if ((norm_b < atol) || (norm_b < rtol*norm_b0))
                 {
+
+			std::ofstream outfile ("dt.txt");
+                        outfile.precision(15);
+    			if(outfile.is_open())
+			{
+        			for(int i = 0 ; i < ntdim-1; i++)
+                		{
+					outfile << dt[i] ;
+            				outfile <<  std::endl;
+				}
+        		}
+    	
                     return u;
                 }
 

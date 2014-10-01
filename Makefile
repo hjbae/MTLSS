@@ -17,9 +17,9 @@ main_stb: LSSm_st.o  main_stb.o chkopts
 	-${CLINKER} -o main_stb LSSm_st.o main_stb.o ${PETSC_LIB}
 	${RM} main_stb.o
 
-matrix2: matrix2.o  chkopts
-	-${CLINKER} -o matrix2 matrix2.o ${PETSC_LIB}
-	${RM} matrix2.o
+main_rk: RK.o main_rk.o  chkopts
+	-${CLINKER} -o main_rk RK.o main_rk.o ${PETSC_LIB}
+	${RM} main_rk.o
 
 solver: solver.o  chkopts
 	-${CLINKER} -o solver solver.o ${PETSC_LIB}

@@ -17,7 +17,7 @@ double* shiftupx(double *y, int nsdim)
 		{
 			yupx[i*21+j-1] = y[i*21+j];
 		}
-		yupx[(i+1)*21-1] = y[i*21];
+		yupx[i*21+20] = y[i*21];
 	}
 
 	for (int i = 0; i < 25; i++)
@@ -26,7 +26,7 @@ double* shiftupx(double *y, int nsdim)
 		{
 			yupx[7*21+i*81+j-1] = y[7*21+i*81+j];
 		}
-		yupx[7*21+(i+1)*81-1] = y[7*21+i*81];
+		yupx[7*21+i*81+80] = y[7*21+i*81];
 	}
 
 	for (int i = 0; i < 7; i ++)
@@ -98,7 +98,7 @@ double* shiftupy(double *y, int nsdim)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			yy[7*21+24*81+i*4+j] = y[7*21+24*81+i*4+j]*0.75+((1-0.25*j)*y[7*21+25*81+i]+(0.25*j)*y[7*21+25*81+i+1])*0.25;
+			yy[7*21+24*81+i*4+j] = (1-0.25*j)*y[7*21+25*81+i]+(0.25*j)*y[7*21+25*81+i+1];
 		}
 	}
 	yy[7*21+24*81+80] = y[7*21+25*81+20];
@@ -133,7 +133,7 @@ double* shiftdowny(double *y, int nsdim)
         {
                 for (int j = 0; j < 4; j++)
                 {
-                        yy[7*21+i*4+j] = y[7*21+i*4+j]*0.75+((1-0.25*j)*y[6*21+i]+(0.25*j)*y[6*21+i+1])*0.25;
+                        yy[7*21+i*4+j] = (1-0.25*j)*y[6*21+i]+(0.25*j)*y[6*21+i+1];
                 }
         }
         yy[7*21+80] = y[6*21+20];
@@ -156,7 +156,6 @@ double* shiftdowny(double *y, int nsdim)
 
 double* F(double* uMid, double p, int ntdim, int nsdim)
 {
-
 	double dx[nsdim];
         for (int i = 0; i < 7*21; i++)
 	{
@@ -175,7 +174,6 @@ double* F(double* uMid, double p, int ntdim, int nsdim)
 	double c = 0.025;
 	double* dudt = new double[(ntdim-1)*nsdim];
 	for (int t = 0; t < ntdim-1; t++)
-
 	{
 		double* bxup = shiftupx(&uMid[t*nsdim],nsdim);
 		double* bxdown = shiftdownx(&uMid[t*nsdim],nsdim);

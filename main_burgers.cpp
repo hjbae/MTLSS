@@ -9,11 +9,11 @@ int main(int argc, char** args)
 {
 
 
-    int ntdim = 61;
+    int ntdim = 81;
     double* t = new double[ntdim];
     for (int i = 0; i<ntdim; i++)
     {
-        t[i] = 0.05*i;
+        t[i] = 3./80.*i;
     }
 
 
@@ -22,7 +22,7 @@ int main(int argc, char** args)
 
 
     std::string line;             
-    std::ifstream myfile ("burgers_81.txt");
+    std::ifstream myfile ("u0_burger_81.txt");
 
     double a;
     int linenum = -1;
@@ -79,7 +79,7 @@ int main(int argc, char** args)
 
 
     std::ofstream outfile ("uf_burger_61_025.txt");
-
+    outfile.precision(15);
     if(outfile.is_open())
     {
         for(int i = 0 ; i < ntdim; i++)
