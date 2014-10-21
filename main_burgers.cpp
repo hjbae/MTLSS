@@ -4,23 +4,25 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <mpi.h>
 
 int main(int argc, char** args)
 {
 
+    int ntdim = 41;
+    double dt = 3./80.;
+    int nsdim = 2319;
 
-    int ntdim = 81;
+
     double* t = new double[ntdim];
-    for (int i = 0; i<ntdim; i++)
+    for (int i = 0; i < ntdim; i++)
     {
-        t[i] = 3./80.*i;
+        t[i] = i*dt;
     }
 
 
-    int nsdim = 2319;
-    double* u0 = new double[ntdim*nsdim];    
 
-
+    double* u0 = new double[ntdim*nsdim];
     std::string line;             
     std::ifstream myfile ("u0_burger_81.txt");
 
@@ -39,12 +41,15 @@ int main(int argc, char** args)
             std::istringstream iss(line);
             for (int i = 0; i<ntdim; i++)
             {
-                iss >> a;
-                u0[i*nsdim+linenum] = a;
+		iss >> a;
+		u0[i*nsdim+linenum] = a;
             }
             
         }
     }
+
+
+
 
     double* k;
     
@@ -72,13 +77,13 @@ int main(int argc, char** args)
         pos ++;
     }
 
-    lssSolver A(t,u0,k,4,c,f,mapcoarse,mapfine,ntdim,nsdim,alpha);
-    
     PetscInitialize(&argc,&args,(char*)0,NULL);
+    lssSolver A(t,u0,k,2,c,f,mapcoarse,mapfine,ntdim,nsdim,alpha);
+    
     double* uf = A.lss();
 
 
-    std::ofstream outfile ("uf_burger_61_025.txt");
+    std::ofstream outfile ("uf_2db_test.txt");
     outfile.precision(15);
     if(outfile.is_open())
     {

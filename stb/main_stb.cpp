@@ -99,7 +99,7 @@ int main(int argc, char** args)
     lssSolver A(t,u0,w,2,c,f,mapcoarse,mapfine,ntdim,nsdim,alpha);
     
     PetscInitialize(&argc,&args,(char*)0,NULL);
-    double* uf = A.lss();
+    double* uf = A.lss(30);
 
 
     std::ofstream outfile ("uf_stb_25.txt");

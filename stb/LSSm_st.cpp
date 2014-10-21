@@ -225,7 +225,7 @@
         {
 
             double Tol = 1.e-7;
-            int maxiter = 2000;
+            int maxiter = 2500;
             Vec r, p;
             
             VecDuplicate(b,&r);

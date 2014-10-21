@@ -14,6 +14,8 @@
         lssSolver::lssSolver(double* t, double* u0, double* zz, int p, int c, int f, int* mapcoarse, int* mapfine, int ntdim, int nsdim, double alpha)
         {
 
+            MPI_Comm_size(MPI_COMM_WORLD, &size);
+            MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
             this->t = t;
             u = u0;
@@ -77,7 +79,6 @@
                     uMidc[i*nsdim+j] = 0.5*(u[(i+1)*p*nsdim+j] + u[i*p*nsdim+j]);
                 }
             }
-
 
 // Calculate dudt in fine and coarse grid points
             dudtf = new double[(ntdim-1)*f];
@@ -242,7 +243,7 @@
 
                 PetscScalar norm;
                 VecNorm(r,NORM_2,&norm);
-
+std::cout << norm << std::endl;
                 if ((norm < Tol*norm0) || (k > maxiter))                
                 {
                     if (k>maxiter)
@@ -277,6 +278,8 @@
 
             double* funcvalf = F(uMidf, 1, ntdim, nsdim);
             double* funcvalc = F(uMidc, 1, nn, nsdim);
+
+
             for (int i=0; i< nn-1; i++)
             {
                 for (int j = 0; j < c; j++)
@@ -304,20 +307,20 @@
 
             for (int iNewton=0; iNewton<maxIter; iNewton++)
             {
+                int size;
 
                 MatCreate(PETSC_COMM_WORLD, &B);
-                MatSetType(B, MATSEQAIJ);
                 MatSetSizes(B, PETSC_DECIDE, PETSC_DECIDE, (nn-1)*(p*f+c),(nn-1)*(p*f+c)+f+c);
+                MatSetType(B, MATMPIAIJ);
                 MatSetFromOptions(B);
                 MatSetUp(B);
-                MatSeqAIJSetPreallocation(B,2*nsdim,NULL);
+                MatMPIAIJSetPreallocation(B,2*nsdim,NULL,2*nsdim,NULL);
 
 
 		double* val = 0;
 		int* ia = 0;
 		int* ja = 0;
 		int nnz;
-
                 for (int i = 0; i < nn-1; i++)
                 {
                     dfdu(uMidc,s,nsdim,i,val,ia,ja,nnz);
@@ -383,7 +386,6 @@
                         }
                     }
                 }
-
 		delete val;
 		delete ia;
 		delete ja;
@@ -415,17 +417,15 @@
                         }
                     }
                 }
-        
                 MatAssemblyBegin(B, MAT_FINAL_ASSEMBLY);
                 MatAssemblyEnd(B, MAT_FINAL_ASSEMBLY);
 
-
                 MatCreate(PETSC_COMM_WORLD, &E);
-                MatSetType(E, MATSEQAIJ);
                 MatSetSizes(E, PETSC_DECIDE, PETSC_DECIDE, (nn-1)*(p*f+c), (nn-1)*(p+1));
+                MatSetType(E, MATMPIAIJ);
                 MatSetFromOptions(E);
                 MatSetUp(E);
-                MatSeqAIJSetPreallocation(E,1,NULL);
+                MatMPIAIJSetPreallocation(E,1,NULL,1,NULL);
                 for (int i = 0; i < (nn-1); i++)
                 {
                     for (int j = 0; j< c; j++)
@@ -447,11 +447,11 @@
 
 
                 MatCreate(PETSC_COMM_WORLD, &wEinv);
-                MatSetType(wEinv, MATSEQAIJ);
                 MatSetSizes(wEinv, PETSC_DECIDE, PETSC_DECIDE, (nn-1)*(p+1), (nn-1)*(p+1));
+                MatSetType(wEinv, MATMPIAIJ);
                 MatSetFromOptions(wEinv);
                 MatSetUp(wEinv);
-                MatSeqAIJSetPreallocation(wEinv,1,NULL);
+                MatMPIAIJSetPreallocation(wEinv,1,NULL,1,NULL);
 
 
 
@@ -469,11 +469,11 @@
                 
 
                 MatCreate(PETSC_COMM_WORLD, &wBinv);
-                MatSetType(wBinv, MATSEQAIJ);
                 MatSetSizes(wBinv, PETSC_DECIDE, PETSC_DECIDE, (nn-1)*(p*f+c)+f+c, (nn-1)*(p*f+c)+f+c);
+                MatSetType(wBinv, MATMPIAIJ);
                 MatSetFromOptions(wBinv);
                 MatSetUp(wBinv);
-                MatSeqAIJSetPreallocation(wBinv,1,NULL);
+                MatMPIAIJSetPreallocation(wBinv,1,NULL,1,NULL);
                 for (int i = 0; i < nn-1; i++)
                 {
                     for (int j = 0; j < c; j++)
@@ -526,15 +526,18 @@
                 VecAssemblyEnd(b1);
 
                 MatCreate(PETSC_COMM_WORLD, &Pinv);
-                MatSetType(Pinv, MATSEQAIJ);
+                MatSetType(Pinv, MATMPIAIJ);
                 MatSetSizes(Pinv, PETSC_DECIDE,PETSC_DECIDE, (nn-1)*(p*f+c), (nn-1)*(p*f+c));
                 MatSetFromOptions(Pinv);
                 MatSetUp(Pinv);
-                MatSeqAIJSetPreallocation(Pinv,1,NULL);
+                MatMPIAIJSetPreallocation(Pinv,1,NULL,1,NULL);
 
-
+//PetscInt rstart,rend;
+//MatGetOwnershipRange(B,&rstart,&rend);
+		//for (int i = rstart; i < rend; i++)
                 for (int i = 0; i < (nn-1)*(p*f+c); i++)
                 {
+/*
                     PetscInt ncols;
                     const PetscInt *cols;
                     const PetscScalar *vals;
@@ -564,13 +567,12 @@
                     }
 
                     MatRestoreRow(E, i, &ncols, &cols, &vals);
-
-                    MatSetValue(Pinv, i, i, 1/sum, INSERT_VALUES);
+*/
+                    MatSetValue(Pinv, i, i, 1, INSERT_VALUES);
                 }
 
                 MatAssemblyBegin(Pinv,MAT_FINAL_ASSEMBLY);
                 MatAssemblyEnd(Pinv,MAT_FINAL_ASSEMBLY);
-
 
                 MatMult(Pinv,b,b1);
 

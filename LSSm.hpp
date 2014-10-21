@@ -1,5 +1,5 @@
-#ifndef LSSm2_hpp
-#define LSSm2_hpp
+#ifndef LSSm_hpp
+#define LSSm_hpp
 #include "petsc.h"
 #include "petscksp.h"
 #include "petscmat.h"
@@ -33,6 +33,7 @@ class lssSolver
         int ntdim;
         int nsdim;
         int nn;
+        int rank, size;
         Mat B;
         Mat E;
         Mat wBinv;
@@ -44,7 +45,7 @@ class lssSolver
         lssSolver(double* t, double* u0, double* zz, int p, int c, int f, int* mapcoarse, int* mapfine, int ntdim, int nsdim, double alpha);
         Vec APinvx(Vec x);
         void CGSolve(Vec b, Vec* w);
-        double* lss(int maxIter=8,double atol=1e-7,double rtol=1e-4);
+        double* lss(int maxIter=8,double atol=1e-8,double rtol=1e-7);
 
 
 };
